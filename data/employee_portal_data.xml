@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portal Home Counters -->
+    <record id="portal_employee_dashboard_counter" model="ir.config_parameter">
+        <field name="key">employee_portal_hub.show_counters</field>
+        <field name="value">True</field>
+    </record>
+
+    <!-- Email Template for Employee Welcome -->
+    <record id="employee_portal_welcome_template" model="mail.template">
+        <field name="name">Employee Portal Welcome</field>
+        <field name="model_id" ref="hr.model_hr_employee"/>
+        <field name="subject">Welcome to Employee Portal - {{ object.name }}</field>
+        <field name="email_from">{{ (object.company_id.email or user.email) }}</field>
+        <field name="email_to">{{ object.work_email }}</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <div style="margin: 0px; padding: 0px; background-color: #f8f9fa;">
+                    <table style="width: 100%; background-color: #f8f9fa; padding: 40px 0px;">
+                        <tr>
+                            <td align="center">
+                                <div style="max-width: 600px; background-color: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden;">
+                                    <!-- Header -->
+                                    <div style="background: linear-gradient(135deg, #007bff, #0056b3); padding: 40px; text-align: center;">
+                                        <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Employee Portal</h1>
+                                        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your gateway to HR services</p>
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div style="padding: 40px;">
+                                        <h2 style="color: #333; margin-bottom: 20px;">Hello {{ object.name }}!</h2>
+
+                                        <p style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                                            We're excited to welcome you to our Employee Portal! You now have access to a comprehensive self-service platform where you can manage your HR needs efficiently.
+                                        </p>
+
+                                        <h3 style="color: #007bff; margin: 30px 0 15px 0;">What you can do:</h3>
+                                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                                            <li><strong>Request Leave:</strong> Submit and track your leave requests</li>
+                                            <li><strong>View Timesheets:</strong> Access your timesheet entries and project hours</li>
+                                            <li><strong>Download Payslips:</strong> Get your payslips anytime, anywhere</li>
+                                            <li><strong>Update Profile:</strong> Keep your information up to date</li>
+                                            <li><strong>View Documents:</strong> Access important HR documents</li>
+                                        </ul>
+
+                                        <div style="text-align: center; margin: 40px 0;">
+                                            <a href="/my/employee"
+                                               style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                                                Access Employee Portal
+                                            </a>
+                                        </div>
+
+                                        <p style="color: #999; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                                            If you have any questions or need assistance, please contact your HR department.
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </field>
+    </record>
+</odoo>
