@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Employee Dashboard Main Page -->
+    <template id="employee_dashboard" name="Employee Dashboard">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container-fluid eph_portal_container">
+                <div class="eph_dashboard">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h2>
+                                    <i class="fa fa-dashboard text-primary"/> Welcome, <t t-esc="employee.name"/>
+                                </h2>
+                                <small class="text-muted">
+                                    Last login: <t t-esc="employee.last_portal_login and employee.last_portal_login.strftime('%B %d, %Y at %I:%M %p') or 'First time'"/>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="eph_stats_card eph_stats_primary">
+                                <div class="eph_stats_body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="eph_stats_value" t-esc="'%.1f' % monthly_hours"/>
+                                            <div class="eph_stats_label">Hours This Month</div>
+                                        </div>
+                                        <i class="eph_stats_icon fa fa-clock-o"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="eph_stats_card eph_stats_success">
+                                <div class="eph_stats_body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="eph_stats_value" t-esc="len(recent_leaves)"/>
+                                            <div class="eph_stats_label">Total Leave Requests</div>
+                                        </div>
+                                        <i class="eph_stats_icon fa fa-calendar"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="eph_stats_card eph_stats_warning">
+                                <div class="eph_stats_body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="eph_stats_value" t-esc="pending_leaves"/>
+                                            <div class="eph_stats_label">Pending Approvals</div>
+                                        </div>
+                                        <i class="eph_stats_icon fa fa-hourglass-half"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="eph_stats_card eph_stats_info">
+                                <div class="eph_stats_body">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <div class="eph_stats_value" t-esc="len(recent_payslips)"/>
+                                            <div class="eph_stats_label">Payslips Available</div>
+                                        </div>
+                                        <i class="eph_stats_icon fa fa-money"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="eph_dashboard_card">
+                                <div class="eph_card_header">
+                                    <h5 class="eph_card_title"><i class="fa fa-bolt"/> Quick Actions</h5>
+                                </div>
+                                <div class="eph_card_body">
+                                    <div class="eph_quick_actions">
+                                        <div class="row">
+                                            <div class="col-md-3 mb-2" t-if="has_leave_module">
+                                                <a href="/my/leave_requests/new" class="eph_action_btn">
+                                                    <div class="eph_action_icon">
+                                                        <i class="fa fa-plus"/>
+                                                    </div>
+                                                    <div class="eph_action_title">Request Leave</div>
+                                                </a>
+                                            </div>
+                                            <div class="col-md-3 mb-2" t-if="has_timesheet_module">
+                                                <a href="/my/timesheets" class="eph_action_btn">
+                                                    <div class="eph_action_icon">
+                                                        <i class="fa fa-clock-o"/>
+                                                    </div>
+                                                    <div class="eph_action_title">View Timesheets</div>
+                                                </a>
+                                            </div>
+                                            <div class="col-md-3 mb-2" t-if="has_payroll_module">
+                                                <a href="/my/payslips" class="eph_action_btn">
+                                                    <div class="eph_action_icon">
+                                                        <i class="fa fa-download"/>
+                                                    </div>
+                                                    <div class="eph_action_title">Download Payslips</div>
+                                                </a>
+                                            </div>
+                                            <div class="col-md-3 mb-2">
+                                                <a href="/my/employee/profile" class="eph_action_btn">
+                                                    <div class="eph_action_icon">
+                                                        <i class="fa fa-user"/>
+                                                    </div>
+                                                    <div class="eph_action_title">Update Profile</div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="row">
+                        <div class="col-lg-6 mb-4" t-if="has_leave_module">
+                            <div class="eph_dashboard_card h-100">
+                                <div class="eph_card_header d-flex justify-content-between">
+                                    <h5 class="eph_card_title"><i class="fa fa-calendar"/> Recent Leave Requests</h5>
+                                    <a href="/my/leave_requests" class="eph_btn eph_btn_sm eph_btn_outline_primary">View All</a>
+                                </div>
+                                <div class="eph_card_body">
+                                    <t t-if="recent_leaves">
+                                        <div class="list-group list-group-flush">
+                                            <t t-foreach="recent_leaves" t-as="leave">
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong t-esc="leave.holiday_status_id.name"/>
+                                                        <br/>
+                                                        <small class="text-muted">
+                                                            <t t-esc="leave.date_from"/> to <t t-esc="leave.date_to"/>
+                                                        </small>
+                                                    </div>
+                                                    <span t-att-class="'eph_badge ' + ('eph_badge_success' if leave.state == 'validate' else 'eph_badge_warning' if leave.state == 'confirm' else 'eph_badge_secondary')"
+                                                          t-esc="leave.state.title()"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="eph_empty_state">
+                                            <div class="eph_empty_icon">
+                                                <i class="fa fa-calendar"/>
+                                            </div>
+                                            <div class="eph_empty_title">No leave requests yet</div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4" t-if="has_timesheet_module">
+                            <div class="eph_dashboard_card h-100">
+                                <div class="eph_card_header d-flex justify-content-between">
+                                    <h5 class="eph_card_title"><i class="fa fa-clock-o"/> Recent Timesheets</h5>
+                                    <a href="/my/timesheets" class="eph_btn eph_btn_sm eph_btn_outline_primary">View All</a>
+                                </div>
+                                <div class="eph_card_body">
+                                    <t t-if="recent_timesheets">
+                                        <div class="list-group list-group-flush">
+                                            <t t-foreach="recent_timesheets" t-as="timesheet">
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong t-esc="timesheet.get_safe_project_name()"/>
+                                                        <br/>
+                                                        <small class="text-muted">
+                                                            <t t-esc="timesheet.date"/>
+                                                        </small>
+                                                    </div>
+                                                    <span class="eph_badge eph_badge_primary">
+                                                        <t t-esc="'%.1f' % timesheet.unit_amount"/>h
+                                                    </span>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="eph_empty_state">
+                                            <div class="eph_empty_icon">
+                                                <i class="fa fa-clock-o"/>
+                                            </div>
+                                            <div class="eph_empty_title">No timesheet entries yet</div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic employee info card when modules are not available -->
+                        <div class="col-lg-6 mb-4" t-if="not has_leave_module and not has_timesheet_module">
+                            <div class="eph_dashboard_card h-100">
+                                <div class="eph_card_header">
+                                    <h5 class="eph_card_title"><i class="fa fa-info-circle"/> Welcome</h5>
+                                </div>
+                                <div class="eph_card_body">
+                                    <p>Welcome to your Employee Portal! This is your central hub for HR services.</p>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fa fa-check text-success"/> View your profile information</li>
+                                        <li><i class="fa fa-check text-success"/> Access company documents</li>
+                                        <li><i class="fa fa-info-circle text-info"/> Additional features available when optional modules are installed</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Payslips -->
+                    <div class="row" t-if="has_payroll_module">
+                        <div class="col-12">
+                            <div class="eph_dashboard_card">
+                                <div class="eph_card_header d-flex justify-content-between">
+                                    <h5 class="eph_card_title"><i class="fa fa-money"/> Recent Payslips</h5>
+                                    <a href="/my/payslips" class="eph_btn eph_btn_sm eph_btn_outline_primary">View All</a>
+                                </div>
+                                <div class="eph_card_body">
+                                    <t t-if="recent_payslips">
+                                        <div class="row">
+                                            <t t-foreach="recent_payslips" t-as="payslip">
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="eph_payslip_card">
+                                                        <div class="eph_payslip_header">
+                                                            <h6 class="eph_payslip_reference" t-esc="payslip.name"/>
+                                                        </div>
+                                                        <div class="eph_payslip_body text-center">
+                                                            <div class="eph_payslip_period">
+                                                                <t t-esc="payslip.date_from"/> - <t t-esc="payslip.date_to"/>
+                                                            </div>
+                                                            <span t-att-class="'eph_badge ' + ('eph_badge_success' if payslip.state == 'done' else 'eph_badge_warning')"
+                                                                  t-esc="payslip.state.title()"/>
+                                                            <br/>
+                                                            <a t-att-href="'/my/payslips/' + str(payslip.id)" class="eph_btn eph_btn_sm eph_btn_outline_primary mt-2">
+                                                                <i class="fa fa-eye"/> View
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="eph_empty_state">
+                                            <div class="eph_empty_icon">
+                                                <i class="fa fa-money"/>
+                                            </div>
+                                            <div class="eph_empty_title">No payslips available yet</div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leave Calendar Section for Employee Dashboard -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="eph_dashboard_card">
+                                <div class="eph_card_header">
+                                    <h5 class="eph_card_title">Leave Calendar</h5>
+                                </div>
+                                <div class="eph_card_body">
+                                    <div class="eph_leave_calendar">
+                                        <div class="eph_calendar_container"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Employee Profile Page -->
+    <template id="employee_profile" name="Employee Profile">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container eph_portal_container">
+                <div class="row">
+                    <div class="col-12">
+                        <h2><i class="fa fa-user"/> My Profile</h2>
+                        <hr/>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="eph_dashboard_card">
+                            <div class="eph_card_body text-center">
+                                <img t-if="employee.avatar_1920"
+                                     t-att-src="'/web/image/hr.employee/' + str(employee.id) + '/avatar_1920'"
+                                     class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;"/>
+                                <i t-else="" class="fa fa-user-circle fa-5x text-muted mb-3"/>
+                                <h4 t-esc="employee.name"/>
+                                <p class="text-muted" t-esc="employee.job_id.name if employee.job_id else 'Employee'"/>
+                                <p class="text-muted" t-esc="employee.department_id.name if employee.department_id else ''"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="eph_dashboard_card">
+                            <div class="eph_card_header">
+                                <h5 class="eph_card_title">Contact Information</h5>
+                            </div>
+                            <div class="eph_card_body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Work Email:</strong>
+                                        <p t-esc="employee.work_email or 'Not provided'"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Work Phone:</strong>
+                                        <p t-esc="employee.work_phone or 'Not provided'"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Mobile:</strong>
+                                        <p t-esc="employee.mobile_phone or 'Not provided'"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Work Location:</strong>
+                                        <p t-esc="employee.work_location_id.name if employee.work_location_id else 'Not specified'"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="eph_dashboard_card mt-3" t-if="employee.parent_id">
+                            <div class="eph_card_header">
+                                <h5 class="eph_card_title">Reporting</h5>
+                            </div>
+                            <div class="eph_card_body">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <strong>Manager:</strong>
+                                        <p t-esc="employee.parent_id.name"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
