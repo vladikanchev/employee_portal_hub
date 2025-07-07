@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Employee Portal Home Integration -->
+    <template id="portal_my_home" inherit_id="portal.portal_my_home" name="Portal My Home Employee">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-if="request.env.user.employee_id" t-call="employee_portal_hub.portal_docs_entry">
+                <t t-set="title">Employee Dashboard</t>
+                <t t-set="url" t-value="'/my/dashboard'"/>
+                <t t-set="placeholder_count" t-value="'employee_count'"/>
+                <t t-set="icon" t-value="'fa-dashboard'"/>
+            </t>
+
+            <t t-if="leave_request_count" t-call="portal.portal_docs_entry">
+                <t t-set="title">Leave Requests</t>
+                <t t-set="url" t-value="'/my/leave_requests'"/>
+                <t t-set="count" t-value="leave_request_count"/>
+                <t t-set="icon" t-value="'fa-calendar'"/>
+            </t>
+
+            <t t-if="timesheet_count" t-call="portal.portal_docs_entry">
+                <t t-set="title">Timesheets</t>
+                <t t-set="url" t-value="'/my/timesheets'"/>
+                <t t-set="count" t-value="timesheet_count"/>
+                <t t-set="icon" t-value="'fa-clock-o'"/>
+            </t>
+
+            <t t-if="payslip_count" t-call="portal.portal_docs_entry">
+                <t t-set="title">Payslips</t>
+                <t t-set="url" t-value="'/my/payslips'"/>
+                <t t-set="count" t-value="payslip_count"/>
+                <t t-set="icon" t-value="'fa-money'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- No Employee Error Template -->
+    <template id="no_employee_error" name="No Employee Record">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="eph_alert eph_alert_warning" role="alert">
+                            <h4 class="alert-heading">No Employee Record Found</h4>
+                            <p>You don't have an employee record associated with your user account. Please contact your HR administrator to set up your employee profile.</p>
+                            <hr/>
+                            <p class="mb-0">Once your employee record is created, you'll be able to access:</p>
+                            <ul class="mt-2">
+                                <li>Leave request management</li>
+                                <li>Timesheet viewing</li>
+                                <li>Payslip access</li>
+                                <li>Employee profile information</li>
+                            </ul>
+                        </div>
+                        <a href="/my" class="eph_btn eph_btn_primary">
+                            <i class="fa fa-arrow-left"/> Back to Portal Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Custom Portal Docs Entry Template -->
+    <template id="portal_docs_entry" name="Portal Docs Entry">
+        <t t-set="count" t-value="count if count is defined else placeholder_count"/>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <a t-att-href="url" class="text-decoration-none">
+                <div class="eph_dashboard_card h-100">
+                    <div class="eph_card_body text-center">
+                        <i t-att-class="'fa fa-3x text-primary mb-3 ' + icon"/>
+                        <h5 class="eph_card_title text-dark" t-esc="title"/>
+                        <span t-if="count and count != placeholder_count" class="eph_badge eph_badge_primary fs-6" t-esc="count"/>
+                        <span t-else="" class="text-muted">Access your <t t-esc="title.lower()"/></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </template>
+
+    <!-- Employee Profile Template -->
+    <template id="employee_profile" name="Employee Profile">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <div class="container eph_portal_container">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <div class="page-header">
+                            <h1>Employee Profile</h1>
+                            <p class="text-muted">Your personal information and employment details</p>
+                        </div>
+
+                        <!-- Personal Information Card -->
+                        <div class="eph_dashboard_card mb-4">
+                            <div class="eph_card_header">
+                                <h5 class="eph_card_title"><i class="fa fa-user"/> Personal Information</h5>
+                            </div>
+                            <div class="eph_card_body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Name:</strong> <span t-field="employee.name"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Job Title:</strong> <span t-field="employee.job_title"/>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <strong>Work Email:</strong> <span t-field="employee.work_email"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Work Phone:</strong> <span t-field="employee.work_phone"/>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <strong>Department:</strong> <span t-field="employee.department_id.name"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Company:</strong> <span t-field="employee.company_id.name"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manager Information Card -->
+                        <div class="eph_dashboard_card mt-3" t-if="employee.parent_id">
+                            <div class="eph_card_header">
+                                <h5 class="eph_card_title"><i class="fa fa-users"/> Manager Information</h5>
+                            </div>
+                            <div class="eph_card_body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Manager:</strong> <span t-field="employee.parent_id.name"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Manager Email:</strong> <span t-field="employee.parent_id.work_email"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Employment Information Card -->
+                        <div class="eph_dashboard_card mt-3">
+                            <div class="eph_card_header">
+                                <h5 class="eph_card_title"><i class="fa fa-briefcase"/> Employment Information</h5>
+                            </div>
+                            <div class="eph_card_body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Employee ID:</strong> <span t-field="employee.identification_id"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Work Location:</strong> <span t-field="employee.work_location_id.name"/>
+                                    </div>
+                                </div>
+                                <div class="row mt-2" t-if="employee.resource_calendar_id">
+                                    <div class="col-md-6">
+                                        <strong>Working Schedule:</strong> <span t-field="employee.resource_calendar_id.name"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation -->
+                        <div class="mt-4">
+                            <a href="/my/employee" class="eph_btn eph_btn_primary">
+                                <i class="fa fa-arrow-left"/> Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

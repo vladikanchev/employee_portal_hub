@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Portal My Timesheets -->
+    <template id="portal_my_timesheets" name="My Timesheets">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fa fa-clock-o"/> My Timesheets</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <form method="get" class="d-flex flex-wrap gap-2">
+                            <select name="sortby" class="form-select" style="max-width: 150px;">
+                                <t t-foreach="searchbar_sortings.items()" t-as="option">
+                                    <option t-att-value="option[0]" t-att-selected="option[0] == sortby"
+                                            t-esc="option[1]['label']"/>
+                                </t>
+                            </select>
+                            <input type="date" name="date_begin" class="form-control" style="max-width: 150px;"
+                                   t-att-value="date_begin" placeholder="From Date"/>
+                            <input type="date" name="date_end" class="form-control" style="max-width: 150px;"
+                                   t-att-value="date_end" placeholder="To Date"/>
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <a href="/my/timesheets" class="btn btn-outline-secondary">Clear</a>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Timesheets List -->
+                <div class="row">
+                    <div class="col-12">
+                        <t t-if="timesheets">
+                            <div class="eph_table">
+                                <table class="table table-hover">
+                                    <thead class="eph_table_header">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Description/Project</th>
+                                            <th>Hours</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="timesheets" t-as="timesheet">
+                                            <tr class="eph_table_row eph_timesheet_row">
+                                                <td class="eph_table_cell eph_timesheet_date">
+                                                    <t t-esc="timesheet.date"/>
+                                                </td>
+                                                <td class="eph_table_cell">
+                                                    <strong t-esc="timesheet.get_safe_project_name()"/>
+                                                    <br/>
+                                                    <small class="text-muted" t-if="timesheet.name != timesheet.get_safe_project_name()"
+                                                           t-esc="timesheet.name"/>
+                                                </td>
+                                                <td class="eph_table_cell eph_timesheet_hours">
+                                                    <span class="eph_badge eph_badge_primary eph_hours_badge">
+                                                        <t t-esc="'%.2f' % timesheet.unit_amount"/>h
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="d-flex justify-content-center mt-4">
+                                <t t-call="portal.pager"/>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="text-center py-5">
+                                <i class="fa fa-clock-o fa-3x text-muted mb-3"/>
+                                <h5 class="text-muted">No timesheet entries found</h5>
+                                <p class="text-muted">No timesheet entries match your search criteria.</p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Portal My Payslips -->
+    <template id="portal_my_payslips" name="My Payslips">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fa fa-money"/> My Payslips</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <form method="get" class="d-flex flex-wrap gap-2">
+                            <select name="sortby" class="form-select" style="max-width: 150px;">
+                                <t t-foreach="searchbar_sortings.items()" t-as="option">
+                                    <option t-att-value="option[0]" t-att-selected="option[0] == sortby"
+                                            t-esc="option[1]['label']"/>
+                                </t>
+                            </select>
+                            <select name="filterby" class="form-select" style="max-width: 150px;">
+                                <t t-foreach="searchbar_filters.items()" t-as="option">
+                                    <option t-att-value="option[0]" t-att-selected="option[0] == filterby"
+                                            t-esc="option[1]['label']"/>
+                                </t>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <a href="/my/payslips" class="btn btn-outline-secondary">Clear</a>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Payslips List -->
+                <div class="row">
+                    <t t-if="payslips">
+                        <t t-foreach="payslips" t-as="payslip">
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="eph_payslip_card">
+                                    <div class="eph_payslip_header">
+                                        <h6 class="eph_payslip_reference" t-esc="payslip.name"/>
+                                    </div>
+                                    <div class="eph_payslip_body">
+                                        <div class="eph_payslip_period mb-2">
+                                            <strong>Period:</strong><br/>
+                                            <t t-esc="payslip.date_from"/> to <t t-esc="payslip.date_to"/>
+                                        </div>
+                                        <div class="mb-2">
+                                            <span t-att-class="'eph_badge ' + ('eph_badge_success' if payslip.state == 'done' else 'eph_badge_warning' if payslip.state == 'draft' else 'eph_badge_secondary')"
+                                                  t-esc="payslip.state.title()"/>
+                                        </div>
+                                    </div>
+                                    <div class="eph_payslip_footer">
+                                        <a t-att-href="'/my/payslips/' + str(payslip.id)"
+                                           class="eph_btn eph_btn_outline_primary eph_btn_sm w-100">
+                                            <i class="fa fa-eye"/> View Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Pagination -->
+                        <div class="col-12">
+                            <div class="d-flex justify-content-center mt-4">
+                                <t t-call="portal.pager"/>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <i class="fa fa-money fa-3x text-muted mb-3"/>
+                                <h5 class="text-muted">No payslips found</h5>
+                                <p class="text-muted">No payslips match your search criteria.</p>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Portal Payslip Detail -->
+    <template id="portal_payslip_detail" name="Payslip Details">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <div class="eph_dashboard_card">
+                            <div class="eph_card_header d-flex justify-content-between align-items-center">
+                                <h4><t t-esc="payslip.name"/></h4>
+                                <span t-att-class="'eph_badge eph_badge_lg ' + ('eph_badge_success' if payslip.state == 'done' else 'eph_badge_warning')"
+                                      t-esc="payslip.state.title()"/>
+                            </div>
+                            <div class="eph_card_body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Payslip Information</h6>
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>Employee:</strong></td>
+                                                <td><t t-esc="payslip.employee_id.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Period:</strong></td>
+                                                <td><t t-esc="payslip.date_from"/> - <t t-esc="payslip.date_to"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Reference:</strong></td>
+                                                <td><t t-esc="payslip.number"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Company Information</h6>
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>Company:</strong></td>
+                                                <td><t t-esc="payslip.company_id.name"/></td>
+                                            </tr>
+                                            <tr t-if="payslip.struct_id">
+                                                <td><strong>Structure:</strong></td>
+                                                <td><t t-esc="payslip.struct_id.name"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <h6 class="mt-4">Payslip Lines</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Description</th>
+                                                <th class="text-end">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-foreach="payslip.line_ids" t-as="line">
+                                                <tr>
+                                                    <td><t t-esc="line.name"/></td>
+                                                    <td class="text-end"><t t-esc="'%.2f' % line.total"/></td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="eph_card_footer">
+                                <a t-att-href="return_url" class="eph_btn eph_btn_secondary">
+                                    <i class="fa fa-arrow-left"/> Back to Payslips
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

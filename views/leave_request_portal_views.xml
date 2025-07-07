@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Leave Request Portal Views using standard hr_holidays -->
+
+    <!-- Portal My Leave Requests -->
+    <template id="portal_my_leave_requests" name="My Leave Requests">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fa fa-calendar"/> My Leave Requests</h2>
+                            <a href="/my/leave_requests/new" class="btn btn-primary">
+                                <i class="fa fa-plus"/> New Request
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <form method="get" class="d-flex flex-wrap gap-2">
+                            <select name="sortby" class="form-select" style="max-width: 150px;">
+                                <t t-foreach="searchbar_sortings.items()" t-as="option">
+                                    <option t-att-value="option[0]" t-att-selected="option[0] == sortby"
+                                            t-esc="option[1]['label']"/>
+                                </t>
+                            </select>
+                            <select name="filterby" class="form-select" style="max-width: 150px;">
+                                <t t-foreach="searchbar_filters.items()" t-as="option">
+                                    <option t-att-value="option[0]" t-att-selected="option[0] == filterby"
+                                            t-esc="option[1]['label']"/>
+                                </t>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <a href="/my/leave_requests" class="btn btn-outline-secondary">Clear</a>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Leave Requests List -->
+                <div class="row">
+                    <t t-if="leave_requests">
+                        <t t-foreach="leave_requests" t-as="leave">
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="card h-100 leave-request-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0" t-esc="leave.holiday_status_id.name"/>
+                                        <span t-att-class="'badge ' + ('bg-success' if leave.state == 'validate' else 'bg-warning' if leave.state == 'confirm' else 'bg-danger' if leave.state == 'refuse' else 'bg-secondary')"
+                                              t-esc="leave.state.title()"/>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">
+                                            <strong>Period:</strong><br/>
+                                            <t t-esc="leave.request_date_from"/> to <t t-esc="leave.request_date_to"/>
+                                        </p>
+                                        <p class="card-text">
+                                            <strong>Duration:</strong> <t t-esc="leave.number_of_days"/> days
+                                        </p>
+                                        <p class="card-text" t-if="leave.name">
+                                            <strong>Description:</strong><br/>
+                                            <span class="text-muted" t-esc="leave.name[:50]"/>
+                                            <span t-if="len(leave.name) > 50">...</span>
+                                        </p>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="d-flex gap-2">
+                                            <a t-att-href="'/my/leave_requests/' + str(leave.id)"
+                                               class="btn btn-outline-primary btn-sm flex-fill">
+                                                <i class="fa fa-eye"/> View
+                                            </a>
+                                            <t t-if="leave.state == 'draft'">
+                                                <a t-att-href="'/my/leave_requests/' + str(leave.id) + '/edit'"
+                                                   class="btn btn-outline-secondary btn-sm flex-fill">
+                                                    <i class="fa fa-edit"/> Edit
+                                                </a>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Pagination -->
+                        <div class="col-12">
+                            <t t-call="portal.pager"/>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <i class="fa fa-calendar fa-3x text-muted mb-3"/>
+                                <h5 class="text-muted">No leave requests found</h5>
+                                <p class="text-muted">You haven't submitted any leave requests yet.</p>
+                                <a href="/my/leave_requests/new" class="btn btn-primary">
+                                    <i class="fa fa-plus"/> Create your first leave request
+                                </a>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Portal Leave Request Detail Page -->
+    <template id="portal_leave_request_detail" name="Leave Request Details">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4><t t-esc="leave.holiday_status_id.name"/></h4>
+                                <span t-att-class="'badge badge-lg ' + ('bg-success' if leave.state == 'validate' else 'bg-warning' if leave.state == 'confirm' else 'bg-danger' if leave.state == 'refuse' else 'bg-secondary')"
+                                      t-esc="leave.state.title()"/>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Leave Details</h6>
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>Employee:</strong></td>
+                                                <td><t t-esc="leave.employee_id.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Leave Type:</strong></td>
+                                                <td><t t-esc="leave.holiday_status_id.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>From Date:</strong></td>
+                                                <td><t t-esc="leave.request_date_from"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>To Date:</strong></td>
+                                                <td><t t-esc="leave.request_date_to"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Duration:</strong></td>
+                                                <td><t t-esc="leave.number_of_days"/> days</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Request Information</h6>
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <td><strong>Created:</strong></td>
+                                                <td><t t-esc="leave.create_date.strftime('%Y-%m-%d %H:%M')"/></td>
+                                            </tr>
+                                            <tr t-if="leave.manager_id">
+                                                <td><strong>Manager:</strong></td>
+                                                <td><t t-esc="leave.manager_id.name"/></td>
+                                            </tr>
+                                            <tr t-if="leave.first_approver_id">
+                                                <td><strong>First Approver:</strong></td>
+                                                <td><t t-esc="leave.first_approver_id.name"/></td>
+                                            </tr>
+                                            <tr t-if="leave.second_approver_id">
+                                                <td><strong>Second Approver:</strong></td>
+                                                <td><t t-esc="leave.second_approver_id.name"/></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <t t-if="leave.name">
+                                    <h6 class="mt-3">Description</h6>
+                                    <p class="text-muted"><t t-esc="leave.name"/></p>
+                                </t>
+
+                                <t t-if="leave.attachment_ids">
+                                    <h6 class="mt-3">Attachments</h6>
+                                    <div class="row">
+                                        <t t-foreach="leave.attachment_ids" t-as="attachment">
+                                            <div class="col-md-4 mb-2">
+                                                <div class="card">
+                                                    <div class="card-body text-center">
+                                                        <i class="fa fa-file-o fa-2x text-muted mb-2"/>
+                                                        <h6 class="card-title"><t t-esc="attachment.name"/></h6>
+                                                        <a t-att-href="'/web/content/' + str(attachment.id) + '?download=true'"
+                                                           class="btn btn-sm btn-outline-primary">
+                                                            <i class="fa fa-download"/> Download
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="card-footer">
+                                <div class="btn-group">
+                                    <a href="/my/leave_requests" class="btn btn-secondary">
+                                        <i class="fa fa-arrow-left"/> Back to List
+                                    </a>
+                                    <t t-if="leave.state == 'draft'">
+                                        <a t-att-href="'/my/leave_requests/' + str(leave.id) + '/edit'" class="btn btn-primary">
+                                            <i class="fa fa-edit"/> Edit
+                                        </a>
+                                        <form method="post" t-att-action="'/my/leave_requests/' + str(leave.id) + '/submit'" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <button type="submit" class="btn btn-success"
+                                                    onclick="return confirm('Are you sure you want to submit this request for approval?')">
+                                                <i class="fa fa-paper-plane"/> Submit for Approval
+                                            </button>
+                                        </form>
+                                    </t>
+                                    <t t-if="leave.state in ['confirm', 'validate1']">
+                                        <form method="post" t-att-action="'/my/leave_requests/' + str(leave.id) + '/cancel'" style="display: inline;">
+                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                            <button type="submit" class="btn btn-warning"
+                                                    onclick="return confirm('Are you sure you want to cancel this request?')">
+                                                <i class="fa fa-times"/> Cancel Request
+                                            </button>
+                                        </form>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Portal New Leave Request Form -->
+    <template id="portal_leave_request_new" name="New Leave Request">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4><i class="fa fa-plus"/> New Leave Request</h4>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="error">
+                                    <div class="alert alert-danger" role="alert">
+                                        <i class="fa fa-exclamation-circle"/> <t t-esc="error"/>
+                                    </div>
+                                </t>
+
+                                <form method="post" enctype="multipart/form-data" class="leave_request_form">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="holiday_status_id">Leave Type *</label>
+                                                <select name="holiday_status_id" id="holiday_status_id" class="form-control" required="True">
+                                                    <option value="">Select Leave Type</option>
+                                                    <t t-foreach="leave_types" t-as="leave_type">
+                                                        <option t-att-value="leave_type.id"
+                                                                t-att-selected="values and values.get('holiday_status_id') == str(leave_type.id)">
+                                                            <t t-esc="leave_type.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="name">Description/Reason</label>
+                                                <input type="text" name="name" id="name" class="form-control"
+                                                       t-att-value="values and values.get('name', '')"
+                                                       placeholder="Brief description of your leave"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="request_date_from">From Date *</label>
+                                                <input type="date" name="request_date_from" id="request_date_from" class="form-control"
+                                                       t-att-value="values and values.get('request_date_from', '')" required="True"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="request_date_to">To Date *</label>
+                                                <input type="date" name="request_date_to" id="request_date_to" class="form-control"
+                                                       t-att-value="values and values.get('request_date_to', '')" required="True"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="attachment">Supporting Documents</label>
+                                        <input type="file" name="attachment" id="attachment" class="form-control-file" multiple="True"/>
+                                        <small class="form-text text-muted">You can upload multiple files if needed.</small>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" name="submit_immediately" id="submit_immediately" class="form-check-input" value="1"/>
+                                        <label for="submit_immediately" class="form-check-label">
+                                            Submit immediately for approval (otherwise will be saved as draft)
+                                        </label>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-save"/> Save Leave Request
+                                        </button>
+                                        <a href="/my/leave_requests" class="btn btn-secondary">
+                                            <i class="fa fa-times"/> Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Portal Edit Leave Request Form -->
+    <template id="portal_leave_request_edit" name="Edit Leave Request">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 offset-lg-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4><i class="fa fa-edit"/> Edit Leave Request</h4>
+                            </div>
+                            <div class="card-body">
+                                <t t-if="error">
+                                    <div class="alert alert-danger" role="alert">
+                                        <i class="fa fa-exclamation-circle"/> <t t-esc="error"/>
+                                    </div>
+                                </t>
+
+                                <form method="post" enctype="multipart/form-data" class="leave_request_form">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="holiday_status_id">Leave Type *</label>
+                                                <select name="holiday_status_id" id="holiday_status_id" class="form-control" required="True">
+                                                    <option value="">Select Leave Type</option>
+                                                    <t t-foreach="leave_types" t-as="leave_type">
+                                                        <option t-att-value="leave_type.id"
+                                                                t-att-selected="leave_type.id == leave.holiday_status_id.id">
+                                                            <t t-esc="leave_type.name"/>
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="name">Description/Reason</label>
+                                                <input type="text" name="name" id="name" class="form-control"
+                                                       t-att-value="leave.name"
+                                                       placeholder="Brief description of your leave"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="request_date_from">From Date *</label>
+                                                <input type="date" name="request_date_from" id="request_date_from" class="form-control"
+                                                       t-att-value="leave.request_date_from" required="True"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="request_date_to">To Date *</label>
+                                                <input type="date" name="request_date_to" id="request_date_to" class="form-control"
+                                                       t-att-value="leave.request_date_to" required="True"/>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="attachment">Add Supporting Documents</label>
+                                        <input type="file" name="attachment" id="attachment" class="form-control-file" multiple="True"/>
+                                        <small class="form-text text-muted">You can upload additional files if needed.</small>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" name="submit_immediately" id="submit_immediately" class="form-check-input" value="1"/>
+                                        <label for="submit_immediately" class="form-check-label">
+                                            Submit immediately for approval after updating
+                                        </label>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fa fa-save"/> Update Leave Request
+                                        </button>
+                                        <a t-att-href="'/my/leave_requests/' + str(leave.id)" class="btn btn-secondary">
+                                            <i class="fa fa-times"/> Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
