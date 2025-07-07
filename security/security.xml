@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Security Groups -->
+        <record id="group_employee_portal_user" model="res.groups">
+            <field name="name">Employee Portal User</field>
+            <field name="category_id" ref="base.module_category_human_resources"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
+        <!-- Record Rules for hr.leave model -->
+
+        <!-- Portal users can only see their own leave requests -->
+        <record id="hr_leave_portal_user_rule" model="ir.rule">
+            <field name="name">Portal User: Own Leave Requests</field>
+            <field name="model_id" ref="hr_holidays.model_hr_leave"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
+        <!-- Portal users can only see their own leave allocations -->
+        <record id="hr_leave_allocation_portal_user_rule" model="ir.rule">
+            <field name="name">Portal User: Own Leave Allocations</field>
+            <field name="model_id" ref="hr_holidays.model_hr_leave_allocation"/>
+            <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
+        <!-- Portal users can only see their own employee record -->
+        <record id="hr_employee_portal_user_rule" model="ir.rule">
+            <field name="name">Portal User: Own Employee Record</field>
+            <field name="model_id" ref="hr.model_hr_employee"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+        </record>
+
+        <!-- Portal users can read leave types -->
+        <record id="hr_leave_type_portal_user_rule" model="ir.rule">
+            <field name="name">Portal User: Read Leave Types</field>
+            <field name="model_id" ref="hr_holidays.model_hr_leave_type"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>
