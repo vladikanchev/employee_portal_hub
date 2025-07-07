@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_leave_portal_user,hr.leave.portal.user,hr_holidays.model_hr_leave,base.group_portal,1,1,1,0
+access_hr_leave_type_portal_user,hr.leave.type.portal.user,hr_holidays.model_hr_leave_type,base.group_portal,1,0,0,0
+access_hr_leave_allocation_portal_user,hr.leave.allocation.portal.user,hr_holidays.model_hr_leave_allocation,base.group_portal,1,0,0,0
+access_hr_employee_portal_user,hr.employee.portal.user,hr.model_hr_employee,base.group_portal,1,0,0,0
+access_account_analytic_line_portal_user,account.analytic.line.portal.user,analytic.model_account_analytic_line,base.group_portal,1,0,0,0
+access_om_hr_payslip_portal_user,hr.payslip.portal.user,om_hr_payroll.model_hr_payslip,base.group_portal,1,0,0,0
+access_ir_attachment_portal_user,ir.attachment.portal.user,base.model_ir_attachment,base.group_portal,1,1,1,1
